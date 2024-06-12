@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const comprobante_venta_controller_1 = require("../controllers/comprobante_venta.controller");
+const ComprobanteVentaRouter = (0, express_1.Router)();
+ComprobanteVentaRouter.post('/', comprobante_venta_controller_1.createComprobanteVenta);
+ComprobanteVentaRouter.get('/', comprobante_venta_controller_1.getComprobantesVenta);
+ComprobanteVentaRouter.get('/:id', comprobante_venta_controller_1.getComprobanteVentaById);
+ComprobanteVentaRouter.get('/venta/:idventa', comprobante_venta_controller_1.getComprobanteVentaByIdVenta);
+ComprobanteVentaRouter.put('/:id', comprobante_venta_controller_1.updateComprobanteVenta);
+ComprobanteVentaRouter.delete('/:id', comprobante_venta_controller_1.deleteComprobanteVenta);
+exports.default = ComprobanteVentaRouter;
