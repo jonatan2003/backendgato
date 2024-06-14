@@ -64,7 +64,7 @@ class Server {
     middlewares() {
         this.app.use(express_1.default.json());
         this.app.use((0, cors_1.default)({
-            origin: 'http://localhost:4200',
+            origin: 'http://161.132.49.58:5200',
             credentials: true // Habilita el intercambio de cookies o encabezados de autenticación
         }));
     }

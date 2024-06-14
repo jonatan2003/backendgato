@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.searchCronogramaPagos = exports.searchDetallesVenta = exports.searchVentas = exports.searchPagos = exports.searchUsuarios = exports.searchCategorias = exports.searchPrestamos = exports.searchTicketsPrestamos = exports.searchInventario = exports.searchArticulos = exports.searchEmpleados = exports.searchClientes = void 0;
+exports.searchCronogramaPagos = exports.searchDetallesVenta = exports.searchVentas = exports.searchPagos = exports.searchUsuarios = exports.searchCategorias = exports.searchComprobantesVentas = exports.searchPrestamos = exports.searchTicketsPrestamos = exports.searchInventario = exports.searchArticulos = exports.searchEmpleados = exports.searchClientes = void 0;
 const cliente_model_1 = __importDefault(require("../models/cliente.model"));
 const sequelize_1 = require("sequelize"); // Agregar esta línea
 const empleado_model_1 = __importDefault(require("../models/empleado.model"));
@@ -28,6 +28,9 @@ const detalleventa_model_1 = __importDefault(require("../models/detalleventa.mod
 const cronograma_pagos_model_1 = __importDefault(require("../models/cronograma_pagos.model"));
 const inventario_model_1 = __importDefault(require("../models/inventario.model"));
 const ticket_model_1 = __importDefault(require("../models/ticket.model"));
+const comprobante_venta_model_1 = __importDefault(require("../models/comprobante_venta.model"));
+const tipo_comprobante_model_1 = __importDefault(require("../models/tipo_comprobante.model"));
+const notacredito_model_1 = __importDefault(require("../models/notacredito.model"));
 //CLIENTES
 const searchClientes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = req.query;
@@ -341,6 +344,71 @@ const searchPrestamos = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.searchPrestamos = searchPrestamos;
+const searchComprobantesVentas = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { searchTerm } = req.query;
+    const page = parseInt(req.query.page, 10) || 1;
+    const pageSize = parseInt(req.query.pageSize, 10) || 10;
+    const offset = (page - 1) * pageSize;
+    try {
+        const comprobantesVenta = yield comprobante_venta_model_1.default.findAndCountAll({
+            limit: pageSize,
+            offset: offset,
+            order: [['id', 'DESC']],
+            include: [
+                {
+                    model: tipo_comprobante_model_1.default,
+                    as: 'TipoComprobante'
+                },
+                {
+                    model: notacredito_model_1.default,
+                    as: 'NotaCredito'
+                },
+                {
+                    model: venta_model_1.default,
+                    as: 'Venta',
+                    include: [
+                        {
+                            model: empleado_model_1.default,
+                            as: 'Empleado'
+                        },
+                        {
+                            model: cliente_model_1.default,
+                            as: 'Cliente'
+                        },
+                    ],
+                },
+            ],
+            where: {
+                [sequelize_1.Op.or]: [
+                    { id: { [sequelize_1.Op.like]: `%${searchTerm}%` } },
+                    { num_serie: { [sequelize_1.Op.like]: `%${searchTerm}%` } },
+                    { '$Venta.Empleado.nombre$': { [sequelize_1.Op.like]: `%${searchTerm}%` } },
+                    { '$Venta.Empleado.apellidos$': { [sequelize_1.Op.like]: `%${searchTerm}%` } },
+                    { '$Venta.Cliente.nombre$': { [sequelize_1.Op.like]: `%${searchTerm}%` } },
+                    { '$Venta.Cliente.apellido$': { [sequelize_1.Op.like]: `%${searchTerm}%` } },
+                    { '$NotaCredito.descripcion$': { [sequelize_1.Op.like]: `%${searchTerm}%` } },
+                    { estado: { [sequelize_1.Op.like]: `%${searchTerm}%` } }, // Buscar por estado del comprobante de venta
+                ]
+            }
+        });
+        // Calcular información de paginación
+        const totalItems = comprobantesVenta.count;
+        const totalPages = Math.ceil(totalItems / pageSize);
+        // Enviar respuesta con los datos y la información de paginación
+        res.json({
+            page,
+            pageSize,
+            totalItems,
+            totalPages,
+            data: comprobantesVenta.rows
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Error al realizar la búsqueda de Comprobantes de Venta' });
+    }
+});
+exports.searchComprobantesVentas = searchComprobantesVentas;
 // CATEGORIA
 const searchCategorias = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = req.query;

@@ -32,6 +32,7 @@ const tipo_comprobante_model_1 = __importDefault(require("../models/tipo_comprob
 const ticket_model_1 = __importDefault(require("../models/ticket.model"));
 const tipo_pago_model_1 = __importDefault(require("../models/tipo_pago.model"));
 const cronograma_pagos_model_1 = __importDefault(require("../models/cronograma_pagos.model"));
+const notacredito_model_1 = __importDefault(require("../models/notacredito.model"));
 const getClientes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const page = parseInt(req.query.page, 10) || 1; // Página solicitada (predeterminada: 1)
@@ -401,6 +402,10 @@ const getComprobantesVenta = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 {
                     model: tipo_comprobante_model_1.default,
                     as: 'TipoComprobante'
+                },
+                {
+                    model: notacredito_model_1.default,
+                    as: 'NotaCredito'
                 },
                 {
                     model: venta_model_1.default,
